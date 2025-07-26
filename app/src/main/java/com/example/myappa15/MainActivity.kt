@@ -1,7 +1,54 @@
 package com.example.myappa15
 
+/**
+ * =========================================================================
+ * PROYECTO FINAL - DESARROLLO ANDROID CON JETPACK COMPOSE
+ * =========================================================================
+ * 
+ * DESCRIPCIÓN DEL PROYECTO:
+ * Esta aplicación Android fue desarrollada como proyecto final por un grupo
+ * de estudiantes. Implementa funcionalidades de verificación de usuario y
+ * muestra información de los desarrolladores mediante un WebView integrado.
+ * 
+ * CARACTERÍSTICAS PRINCIPALES:
+ * - Interfaz moderna usando Jetpack Compose
+ * - Sistema de navegación entre pantallas
+ * - Verificación de credenciales de usuario
+ * - WebView con información del proyecto
+ * - Diseño Material Design 3
+ * 
+ * ESTRUCTURA DE LA APLICACIÓN:
+ * 1. Pantalla Principal: Selección de proyectos
+ * 2. Pantalla de Verificación: Formulario de login
+ * 3. Pantalla de Autores: Información de desarrolladores
+ * 
+ * TECNOLOGÍAS UTILIZADAS:
+ * - Kotlin (Lenguaje de programación)
+ * - Jetpack Compose (Framework de UI)
+ * - Android Navigation (Navegación)
+ * - Material Design 3 (Sistema de diseño)
+ * - WebView (Contenido web)
+ * 
+ * AUTORES:
+ * - Henry Castro (1-21-4112)
+ * - Lissette Rodríguez (1-19-3824)
+ * - Miguel Berroa (2-16-3694)
+ * 
+ * FECHA DE DESARROLLO: 2024
+ * VERSIÓN: 1.0
+ * 
+ * =========================================================================
+ */
+
+// =========================================================================
+// IMPORTS NECESARIOS PARA LA APLICACIÓN
+// =========================================================================
+
+// Imports básicos de Android
 import android.os.Bundle
 import android.widget.Toast
+
+// Imports de Jetpack Compose (UI moderna de Android)
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -18,21 +65,49 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+// Imports para navegación entre pantallas
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+
+// Imports para WebView (mostrar contenido web)
 import androidx.compose.ui.viewinterop.AndroidView
 import android.webkit.WebView
 import android.webkit.WebViewClient
+
+// Import del tema personalizado de la aplicación
 import com.example.myappa15.ui.theme.MyappA15Theme
 
+/**
+ * ACTIVIDAD PRINCIPAL DE LA APLICACIÓN
+ * 
+ * Esta es la actividad principal que se ejecuta cuando el usuario abre la app.
+ * Aquí configuramos el tema y la navegación principal.
+ * 
+ * @author Henry Castro, Lissette Rodríguez, Miguel Berroa
+ * @version 1.0
+ */
 class MainActivity : ComponentActivity() {
+    
+    /**
+     * Método que se ejecuta cuando la actividad se crea por primera vez.
+     * Aquí configuramos la interfaz de usuario usando Jetpack Compose.
+     * 
+     * @param savedInstanceState Bundle que contiene el estado anterior de la actividad
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Habilitamos el modo edge-to-edge para una experiencia más inmersiva
         enableEdgeToEdge()
+        
+        // Configuramos el contenido de la actividad usando Jetpack Compose
         setContent {
+            // Aplicamos el tema personalizado de la aplicación
             MyappA15Theme {
+                // Iniciamos la navegación principal de la app
                 AppNavigation()
             }
         }
@@ -40,20 +115,40 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Gestor de la navegación principal de la aplicación.
+ * GESTOR DE NAVEGACIÓN PRINCIPAL
+ * 
+ * Esta función maneja toda la navegación entre las diferentes pantallas de la aplicación.
+ * Usamos Jetpack Navigation Compose para una navegación moderna y declarativa.
+ * 
+ * Funcionalidades:
+ * - Navegación entre pantallas
+ * - Gestión del estado de navegación
+ * - Configuración de rutas
+ * 
+ * @author Henry Castro, Lissette Rodríguez, Miguel Berroa
  */
 @Composable
 fun AppNavigation() {
+    // Creamos el controlador de navegación que maneja los cambios entre pantallas
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "project_selection_screen") {
-
+    
+    // Configuramos el host de navegación con todas las rutas disponibles
+    NavHost(
+        navController = navController, 
+        startDestination = "project_selection_screen" // Pantalla que se muestra al abrir la app
+    ) {
+        
+        // RUTA 1: Pantalla de selección de proyectos (pantalla principal)
         composable("project_selection_screen") {
             ProjectSelectionScreen(navController = navController)
         }
+        
+        // RUTA 2: Pantalla de verificación de usuario (Proyecto 1)
         composable("verification_screen") {
             VerificationScreen(navController = navController)
         }
-        // <-- NUEVO: Ruta para la pantalla "Acerca de los Autores".
+        
+        // RUTA 3: Pantalla de información de los autores
         composable("about_screen") {
             AboutScreen(navController = navController)
         }
@@ -341,73 +436,153 @@ fun AuthorCard(name: String, matricula: String) {
 
 
 // =========================================================================
-// Contenido y Previsualizaciones
+// CONTENIDO Y PREVISUALIZACIONES
 // =========================================================================
 
 /**
- * Contenido específico de la pantalla de verificación.
+ * CONTENIDO ESPECÍFICO DE LA PANTALLA DE VERIFICACIÓN
+ * 
+ * Esta función contiene toda la lógica y UI de la pantalla de verificación de usuario.
+ * Implementa un formulario simple con validación básica.
+ * 
+ * Características:
+ * - Campos de entrada para usuario y clave
+ * - Validación de datos
+ * - Mensajes de confirmación
+ * - Diseño limpio y centrado
+ * 
+ * @param modifier Modificador opcional para personalizar el layout
+ * @author Henry Castro, Lissette Rodríguez, Miguel Berroa
  */
 @Composable
 fun VerificationContent(modifier: Modifier = Modifier) {
+    // Obtenemos el contexto actual para mostrar mensajes Toast
     val context = LocalContext.current
-    var textField1Value by remember { mutableStateOf("") }
-    var claveValue by remember { mutableStateOf("") }
+    
+    // Estados para almacenar los valores de los campos de texto
+    // remember { mutableStateOf("") } crea un estado que persiste entre recomposiciones
+    var textField1Value by remember { mutableStateOf("") } // Estado para el campo de usuario
+    var claveValue by remember { mutableStateOf("") } // Estado para el campo de clave
 
+    /**
+     * FUNCIÓN DE VALIDACIÓN
+     * 
+     * Esta función verifica si los datos ingresados son válidos.
+     * Por ahora solo verifica que la clave no esté vacía.
+     * 
+     * Lógica de validación:
+     * - Si la clave está vacía: muestra mensaje de error
+     * - Si la clave tiene contenido: muestra mensaje de éxito
+     */
     fun verificarClave() {
         if (claveValue.isEmpty()) {
+            // Mostramos un mensaje de error si la clave está vacía
             Toast.makeText(context, "La clave no puede quedar vacía", Toast.LENGTH_LONG).show()
         } else {
+            // Mostramos un mensaje de éxito si la clave tiene contenido
             Toast.makeText(context, "Verificación exitosa", Toast.LENGTH_SHORT).show()
         }
     }
 
+    // LAYOUT PRINCIPAL DE LA PANTALLA
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .fillMaxSize() // Ocupa toda la pantalla disponible
+            .padding(16.dp), // Padding exterior de 16dp
+        horizontalAlignment = Alignment.CenterHorizontally, // Centra el contenido horizontalmente
+        verticalArrangement = Arrangement.spacedBy(12.dp) // Espaciado vertical de 12dp entre elementos
     ) {
+        // CAMPO DE ENTRADA PARA USUARIO
         OutlinedTextField(
-            value = textField1Value,
-            onValueChange = { textField1Value = it },
-            label = { Text("Usuario (ejemplo)") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            value = textField1Value, // Valor actual del campo
+            onValueChange = { textField1Value = it }, // Función que se ejecuta cuando cambia el valor
+            label = { Text("Usuario (ejemplo)") }, // Etiqueta del campo
+            modifier = Modifier.fillMaxWidth(), // El campo ocupa todo el ancho disponible
+            singleLine = true // Restringe la entrada a una sola línea
         )
+        
+        // CAMPO DE ENTRADA PARA CLAVE
         OutlinedTextField(
-            value = claveValue,
-            onValueChange = { claveValue = it },
-            label = { Text("Clave") },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            value = claveValue, // Valor actual del campo
+            onValueChange = { claveValue = it }, // Función que se ejecuta cuando cambia el valor
+            label = { Text("Clave") }, // Etiqueta del campo
+            modifier = Modifier.fillMaxWidth(), // El campo ocupa todo el ancho disponible
+            singleLine = true // Restringe la entrada a una sola línea
         )
+        
+        // ESPACIADOR para separar los campos del botón
         Spacer(modifier = Modifier.height(8.dp))
-        Button(onClick = { verificarClave() }, modifier = Modifier.fillMaxWidth()) {
-            Text("Verificar")
+        
+        // BOTÓN DE VERIFICACIÓN
+        Button(
+            onClick = { verificarClave() }, // Función que se ejecuta al presionar el botón
+            modifier = Modifier.fillMaxWidth() // El botón ocupa todo el ancho disponible
+        ) {
+            Text("Verificar") // Texto del botón
         }
     }
 }
 
+// =========================================================================
+// PREVISUALIZACIONES PARA DESARROLLO
+// =========================================================================
+
+/**
+ * PREVISUALIZACIÓN DE LA PANTALLA DE SELECCIÓN DE PROYECTOS
+ * 
+ * Esta función permite ver cómo se ve la pantalla principal en Android Studio
+ * sin necesidad de ejecutar la aplicación completa.
+ * 
+ * Uso: Se muestra en el panel de Preview de Android Studio
+ * 
+ * @author Henry Castro, Lissette Rodríguez, Miguel Berroa
+ */
 @Preview(showBackground = true, name = "Project Selection Screen")
 @Composable
 fun ProjectSelectionPreview() {
+    // Aplicamos el tema personalizado para la previsualización
     MyappA15Theme {
+        // Creamos un controlador de navegación temporal para la preview
         ProjectSelectionScreen(rememberNavController())
     }
 }
 
+/**
+ * PREVISUALIZACIÓN DE LA PANTALLA DE VERIFICACIÓN
+ * 
+ * Esta función permite ver cómo se ve la pantalla de verificación en Android Studio
+ * sin necesidad de ejecutar la aplicación completa.
+ * 
+ * Uso: Se muestra en el panel de Preview de Android Studio
+ * 
+ * @author Henry Castro, Lissette Rodríguez, Miguel Berroa
+ */
 @Preview(showBackground = true, name = "Verification Screen")
 @Composable
 fun VerificationPreview() {
-    MyappA15Theme { VerificationScreen(rememberNavController()) }
+    // Aplicamos el tema personalizado para la previsualización
+    MyappA15Theme { 
+        // Creamos un controlador de navegación temporal para la preview
+        VerificationScreen(rememberNavController()) 
+    }
 }
 
-// <-- NUEVO: Preview para la pantalla de "Acerca de".
+/**
+ * PREVISUALIZACIÓN DE LA PANTALLA DE INFORMACIÓN DE AUTORES
+ * 
+ * Esta función permite ver cómo se ve la pantalla de autores en Android Studio
+ * sin necesidad de ejecutar la aplicación completa.
+ * 
+ * Uso: Se muestra en el panel de Preview de Android Studio
+ * 
+ * @author Henry Castro, Lissette Rodríguez, Miguel Berroa
+ */
 @Preview(showBackground = true, name = "About Screen")
 @Composable
 fun AboutScreenPreview() {
+    // Aplicamos el tema personalizado para la previsualización
     MyappA15Theme {
+        // Creamos un controlador de navegación temporal para la preview
         AboutScreen(rememberNavController())
     }
 }
