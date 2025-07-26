@@ -1,4 +1,4 @@
-package com.example.myappa15 // O el nombre de tu paquete
+package com.example.myappa15
 
 import android.os.Bundle
 import android.widget.Toast
@@ -22,7 +22,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.myappa15.ui.theme.MyappA15Theme // O el nombre de tu tema
+import androidx.compose.ui.viewinterop.AndroidView
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import com.example.myappa15.ui.theme.MyappA15Theme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -147,7 +150,6 @@ fun VerificationScreen(navController: NavController) {
 /**
  * PANTALLA 3: Acerca de los Autores.
  */
-// <-- NUEVO: Esta es la pantalla para la información de los autores.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(navController: NavController) {
@@ -170,42 +172,168 @@ fun AboutScreen(navController: NavController) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(24.dp), // Un poco más de padding
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically)
         ) {
             Text(
-                text = "Este proyecto fue desarrollado por:",
+                text = "Sustentado por:",
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+
+            // Autor 1 - Henry Castro
+            AuthorCard(name = "Henry Castro", matricula = "1-21-4112")
+
+            // Autor 2 - Lissette Rodríguez
+            AuthorCard(name = "Lissette Rodríguez", matricula = "1-19-3824")
+
+            // Autor 3 - Miguel Berroa
+            AuthorCard(name = "Miguel Berroa", matricula = "2-16-3694")
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // WebView con contenido adicional
+            Text(
+                text = "Información Adicional:",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Autor 1
-            AuthorCard(name = "Juan Pérez", role = "Líder de Proyecto / UI-UX")
-
-            // Autor 2
-            AuthorCard(name = "María Rodríguez", role = "Desarrolladora Android / Navegación")
-
-            // Autor 3
-            AuthorCard(name = "Carlos Gómez", role = "Lógica de Negocio / Pruebas")
+            WebViewContent()
         }
     }
 }
 
+/**
+ * Componente WebView para mostrar contenido web
+ */
+@Composable
+fun WebViewContent() {
+    AndroidView(
+        factory = { context ->
+            WebView(context).apply {
+                webViewClient = WebViewClient()
+                settings.apply {
+                    javaScriptEnabled = true
+                    domStorageEnabled = true
+                    loadWithOverviewMode = true
+                    useWideViewPort = true
+                }
+            }
+        },
+        update = { webView ->
+            // Cargar una página HTML simple con información del proyecto
+            val htmlContent = """
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            margin: 20px;
+                            background-color: #f5f5f5;
+                            color: #333;
+                        }
+                        .container {
+                            background-color: white;
+                            padding: 20px;
+                            border-radius: 10px;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        }
+                        h2 {
+                            color: #2196F3;
+                            text-align: center;
+                        }
+                        .info-item {
+                            margin: 10px 0;
+                            padding: 10px;
+                            background-color: #f8f9fa;
+                            border-radius: 5px;
+                        }
+                        .highlight {
+                            background-color: #e3f2fd;
+                            padding: 15px;
+                            border-radius: 8px;
+                            margin: 15px 0;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <h2>Proyecto Final - Desarrollo Android</h2>
+                        
+                        <div class="highlight">
+                            <strong>Descripción del Proyecto:</strong><br>
+                            Aplicación Android desarrollada con Jetpack Compose que incluye 
+                            funcionalidades de verificación de usuario y WebView integrado.
+                        </div>
+                        
+                        <div class="info-item">
+                            <strong>Tecnologías Utilizadas:</strong><br>
+                            • Kotlin<br>
+                            • Jetpack Compose<br>
+                            • Android Navigation<br>
+                            • Material Design 3<br>
+                            • WebView
+                        </div>
+                        
+                        <div class="info-item">
+                            <strong>Funcionalidades:</strong><br>
+                            • Sistema de navegación entre pantallas<br>
+                            • Verificación de usuario<br>
+                            • Visualización de contenido web<br>
+                            • Interfaz moderna y responsiva
+                        </div>
+                        
+                        <div class="highlight">
+                            <strong>Fecha de Desarrollo:</strong> 2024<br>
+                            <strong>Versión:</strong> 1.0
+                        </div>
+                    </div>
+                </body>
+                </html>
+            """.trimIndent()
+            
+            webView.loadDataWithBaseURL(
+                null,
+                htmlContent,
+                "text/html",
+                "UTF-8",
+                null
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+    )
+}
+
 // Composable de ayuda para mostrar la info de cada autor de forma ordenada
 @Composable
-fun AuthorCard(name: String, role: String) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
+fun AuthorCard(name: String, matricula: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = name,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
             )
             Text(
-                text = role,
-                style = MaterialTheme.typography.bodyMedium
+                text = matricula,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
             )
         }
     }
